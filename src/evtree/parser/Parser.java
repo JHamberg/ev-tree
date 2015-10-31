@@ -49,20 +49,17 @@ public class Parser {
     public static EVTree parseTree(File file) throws FileNotFoundException {
         scanner = new Scanner(file);
         
-        // Rewind to root
-        String[] rootData = getRoot(scanner).split(" ");
+        // Instantate root node
+        String line = getRoot(scanner);
         EVNode root = new EVNode();
         root.setSplit("root");
         root.setValue("null");
-        root.setEntropy(getDoubleValue(rootData,1));
-        root.setEv(getDoubleValue(rootData,2));
-        root.setCount(getDoubleValue(rootData,3));
-        root.setErr(getDoubleValue(rootData, 4));
+        setValues(root, line);
         
-        // Create nodes
+        // Create other nodes
         EVNode node;
         while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
+            line = scanner.nextLine();
             node = new EVNode();
             String level = setValues(node, line);
             nodes.put(level, node);
@@ -96,9 +93,11 @@ public class Parser {
         String level = parentChain + nodeData[0];
 
         // Set node values
-        String split[] = getSplit(nodeData);
-        node.setSplit(split[0]);
-        node.setValue(split[1]);
+        if(!"root".equals(node.getSplit())){
+            String split[] = getSplit(nodeData);
+            node.setSplit(split[0]);
+            node.setValue(split[1]);
+        }
         node.setEntropy(getDoubleValue(nodeData, 1));
         node.setEv(getDoubleValue(nodeData, 2));
         node.setCount(getDoubleValue(nodeData, 3));
