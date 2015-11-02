@@ -3,15 +3,15 @@ package evtree;
 import java.util.ArrayList;
 
 /**
- * EVNode implementation.
+ * Simple EVNode implementation.
  * @author Jonatan Hamberg
  */
 public class EVNode {
 
     private EVNode parent;
-    private final ArrayList<EVNode> children;
+    private final ArrayList<EVNode> children; 
     private String split;
-    private String value;
+    private Object value;
     private double ev;
     private double entropy;
     private double count;
@@ -29,7 +29,7 @@ public class EVNode {
      * @param node
      */
     public void addChild(EVNode node) {
-        children.add(node);
+        children.add(node); 
     }
 
     /**
@@ -51,6 +51,7 @@ public class EVNode {
      * @return Child nodes
      */
     public ArrayList<EVNode> getChildren() {
+        // TODO: SortedList
         return children;
     }
 
@@ -72,7 +73,7 @@ public class EVNode {
     /**
      * @return Split value
      */
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
@@ -80,7 +81,7 @@ public class EVNode {
      * Sets a split value
      * @param splitValue Split value
      */
-    public void setValue(String splitValue) {
+    public void setValue(Object splitValue) {
         this.value = splitValue;
     }
 

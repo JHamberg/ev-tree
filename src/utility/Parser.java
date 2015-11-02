@@ -1,4 +1,4 @@
-package evtree.parser;
+package utility;
 
 import evtree.EVNode;
 import evtree.EVTree;
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 /**
- * Parses a text file and creates an EVTree.
+ * Parser for logfiles containing EVTrees.
  * @author Jonatan Hamberg
  */
 public class Parser {
@@ -16,6 +16,7 @@ public class Parser {
     private static final String PARENT_DELIMITER = ";";
     private static final String DATA_DELIMITER = " ";
     private static final String VALUE_DELIMITER = "=";
+    private static final String RANGE_DELIMITER = "/";
 
     private static final HashMap<String, EVNode> nodes = new HashMap<>();
     private static Scanner scanner;
@@ -96,7 +97,14 @@ public class Parser {
         if(!"root".equals(node.getSplit())){
             String split[] = getSplit(nodeData);
             node.setSplit(split[0]);
-            node.setValue(split[1]);
+            if(split[1].contains(RANGE_DELIMITER)){
+                String[] parts = split[1].split(RANGE_DELIMITER);
+                Range range = new Range(
+                        Integer.parseInt(parts[0]), 
+                        Integer.parseInt(parts[1])
+                );
+                node.setValue(range);
+            } else node.setValue(split[1]);
         }
         node.setEntropy(getDoubleValue(nodeData, 1));
         node.setEv(getDoubleValue(nodeData, 2));
