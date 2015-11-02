@@ -9,13 +9,15 @@ import java.util.TreeSet;
 public class EVNode implements Comparable {
 
     private EVNode parent;
-    private final TreeSet<EVNode> children;
     private String split;
     private Object value;
     private double ev;
     private double entropy;
     private double count;
     private double err;
+    
+    // Implement later as TreeMap<Object, EVNode>
+    private final TreeSet<EVNode> children; 
 
     /**
      * Initializes an EVNode.
