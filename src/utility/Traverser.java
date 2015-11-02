@@ -2,8 +2,8 @@ package utility;
 
 import evtree.EVNode;
 import evtree.EVTree;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 /**
  * Simple EVTree traverser.
@@ -26,7 +26,7 @@ public class Traverser {
     // This method is incomplete
     public void getSuggestions() {
         EVNode root = tree.getRoot();
-        ArrayList<EVNode> children;
+        TreeSet<EVNode> children;
         while(!(children = root.getChildren()).isEmpty()){
             for(EVNode node : children){
                 // System.out.println(node.getSplit());

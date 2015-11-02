@@ -1,15 +1,15 @@
 package evtree;
 
-import java.util.ArrayList;
+import java.util.TreeSet;
 
 /**
  * Simple EVNode implementation.
  * @author Jonatan Hamberg
  */
-public class EVNode {
+public class EVNode implements Comparable {
 
     private EVNode parent;
-    private final ArrayList<EVNode> children; 
+    private final TreeSet<EVNode> children;
     private String split;
     private Object value;
     private double ev;
@@ -21,7 +21,7 @@ public class EVNode {
      * Initializes an EVNode.
      */
     public EVNode() {
-        children = new ArrayList<>();
+        children = new TreeSet<>();
     }
 
     /**
@@ -29,7 +29,7 @@ public class EVNode {
      * @param node
      */
     public void addChild(EVNode node) {
-        children.add(node); 
+        children.add(node);
     }
 
     /**
@@ -50,8 +50,7 @@ public class EVNode {
     /**
      * @return Child nodes
      */
-    public ArrayList<EVNode> getChildren() {
-        // TODO: SortedList
+    public TreeSet<EVNode> getChildren() {
         return children;
     }
 
@@ -86,7 +85,7 @@ public class EVNode {
     }
 
     /**
-     * @return Ev value
+     * @return Expected value
      */
     public double getEv() {
         return ev;
@@ -108,8 +107,8 @@ public class EVNode {
     }
 
     /**
-     * Sets an ev value
-     * @param ev Ev value
+     * Sets an expected value
+     * @param ev Expected value
      */
     public void setEv(double ev) {
         this.ev = ev;
@@ -156,5 +155,15 @@ public class EVNode {
                 + entropy + ", count="
                 + count + ", err="
                 + err + '}';
+    }
+
+    /**
+     * Makes EVNodes comparable by their expected value.
+     * @param node EVNode to be compared
+     * @return Negative, zero or positive integer
+     */
+    @Override
+    public int compareTo(Object node) {
+        return Double.compare(((EVNode) node).getEv(), this.getEv());
     }
 }

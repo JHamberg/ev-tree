@@ -43,17 +43,17 @@ public class EVTree {
     // Recursively prints the tree as a list
     private void print(EVNode root, String prefix, int depth){
         if(root == null || depth < 0) return;
-        String val = "";
+        String splitValue;
         Object value = root.getValue();
         if(value instanceof Range){
             Range range = (Range) value;
-            val = "["+range.getMin()+","+range.getMax()+"]";
+            splitValue = "["+range.getMin()+","+range.getMax()+"]";
         } else {
-            val = (String) value;
+            splitValue = (String) value;
         }
         System.out.println(prefix 
                 + "+- " + root.getSplit() 
-                + ": " + val
+                + ": " + splitValue
                 + " (" + root.getEv() + ")");
         for(EVNode child : root.getChildren()){
             print(child, prefix+"|  ", depth-1);
