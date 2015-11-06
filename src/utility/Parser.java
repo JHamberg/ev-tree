@@ -54,7 +54,7 @@ public class Parser {
         String line = getRoot(scanner);
         EVNode root = new EVNode();
         root.setSplit("root");
-        root.setValue("null");
+        root.setValueString("null");
         setValues(root, line);
         
         // Create other nodes
@@ -73,7 +73,9 @@ public class Parser {
             String parentHash = (i>=0) ? hash.substring(0, i) : "";
             EVNode parent = nodes.get(parentHash);
             node.setParent((parent == null) ? root : parent);
-            ((parent == null) ? root : parent).addChild(node);
+            if(node.getValueString() == null || !node.getValueString().equalsIgnoreCase("other")){
+                ((parent == null) ? root : parent).addChild(node);
+            }
         }
         
         return new EVTree(root);
@@ -103,8 +105,8 @@ public class Parser {
                         Integer.parseInt(parts[0]), 
                         Integer.parseInt(parts[1])
                 );
-                node.setValue(range);
-            } else node.setValue(split[1]);
+                node.setValueRange(range);
+            } else node.setValueString(split[1]);
         }
         node.setEntropy(getDoubleValue(nodeData, 1));
         node.setEv(getDoubleValue(nodeData, 2));

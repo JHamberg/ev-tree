@@ -15,10 +15,9 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException {
         File treeFile = openFile();
         EVTree tree = Parser.parseTree(treeFile);
-        tree.print(3); // depth 3
+        tree.print(); // depth 3
         
         HashMap<String, Object> info = getDeviceInfo();
-        System.out.println("\nSuggestions:");
         for(String suggestion : tree.getSuggestions(info)){
             System.out.println(suggestion);
         }

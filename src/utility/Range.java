@@ -9,7 +9,7 @@ import java.util.Comparator;
  * 
  * @param <T> Type of elements in range.
  */
-public final class Range<T> implements Serializable{
+public final class Range<T> implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Comparator<T> comparator;
     private final T min;
@@ -61,8 +61,13 @@ public final class Range<T> implements Serializable{
                 &&  comparator.compare(t, max) < 1;
     }
     
+    @Override
+    public String toString(){
+        return "["+this.min+","+this.max+"]";
+    }
+    
     // Comparator wrapper
-    private class RangeComparator implements Comparator {
+    private class RangeComparator implements Comparator, Serializable {
         @Override
         public int compare(Object t, Object t1) {
             return ((Comparable) t).compareTo(t1);

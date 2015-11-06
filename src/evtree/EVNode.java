@@ -1,22 +1,28 @@
 package evtree;
 
+import java.io.Serializable;
 import java.util.TreeSet;
+import utility.Range;
 
 /**
  * Simple EVNode implementation.
  * @author Jonatan Hamberg
  */
-public class EVNode implements Comparable {
-
-    private EVNode parent;
+public class EVNode implements Comparable<EVNode>, Serializable {
+    
+    // Properties
     private String split;
-    private Object value;
     private double ev;
     private double entropy;
     private double count;
     private double err;
     
-    // Implement later as TreeMap<Object, EVNode>
+    // Either is used as the value
+    private String valueString;
+    private Range valueRange;
+    
+    // Predecessor and successors
+    private EVNode parent;
     private final TreeSet<EVNode> children; 
 
     /**
@@ -72,18 +78,33 @@ public class EVNode implements Comparable {
     }
 
     /**
-     * @return Split value
+     * @return String value
      */
-    public Object getValue() {
-        return value;
+    public String getValueString() {
+        return valueString;
     }
 
     /**
-     * Sets a split value
-     * @param splitValue Split value
+     * Sets a value string
+     * @param valueString String value
      */
-    public void setValue(Object splitValue) {
-        this.value = splitValue;
+    public void setValueString(String valueString) {
+        this.valueString = valueString;
+    }
+
+    /**
+     * @return Range value
+     */
+    public Range getValueRange() {
+        return valueRange;
+    }
+
+    /**
+     * Sets a value range
+     * @param valueRange
+     */
+    public void setValueRange(Range valueRange) {
+        this.valueRange = valueRange;
     }
 
     /**
@@ -148,6 +169,10 @@ public class EVNode implements Comparable {
 
     @Override
     public String toString() {
+        String value = valueString;
+        if(value == null){
+            value = valueRange.toString();
+        }
         return "EVNode{"
                 + "parent=" + parent
                 + ", children=" + children
@@ -165,7 +190,7 @@ public class EVNode implements Comparable {
      * @return Negative, zero or positive integer
      */
     @Override
-    public int compareTo(Object node) {
-        return Double.compare(((EVNode) node).getEv(), this.getEv());
+    public int compareTo(EVNode node) {
+        return Double.compare(node.getEv(), this.getEv());
     }
 }
