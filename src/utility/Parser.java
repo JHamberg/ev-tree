@@ -12,6 +12,7 @@ import java.util.Scanner;
  * @author Jonatan Hamberg
  */
 public class Parser {
+    private static final Double MAXIMUM_ERROR_RATIO = 1000.0;
     private static final String ROOT = "root entropy";
     private static final String PARENT_DELIMITER = ";";
     private static final String DATA_DELIMITER = " ";
@@ -57,7 +58,7 @@ public class Parser {
         root.setValueString("null");
         setValues(root, line);
         
-        // Create other nodes
+        // Parse nodes line by line
         EVNode node;
         while (scanner.hasNextLine()) {
             line = scanner.nextLine();
@@ -66,9 +67,12 @@ public class Parser {
             nodes.put(level, node);
         }
         
-        // Add nodes to the tree
+        // Loop through created nodes
         for(String hash : nodes.keySet()){
             node = nodes.get(hash);
+            
+            // Prune unrealiable nodes with high error
+            if(node.getErr() >= MAXIMUM_ERROR_RATIO * node.getEv()) continue;
             int i = hash.lastIndexOf(PARENT_DELIMITER);
             String parentHash = (i>=0) ? hash.substring(0, i) : "";
             EVNode parent = nodes.get(parentHash);
