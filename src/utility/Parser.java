@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 /**
- * Parser for logfiles containing EVTrees.
+ * Parser for reading a log files into an EVTree.
  * @author Jonatan Hamberg
  */
 public class Parser {
@@ -24,25 +24,8 @@ public class Parser {
 
     /**
      * Parses nodes from a text file and creates an EVTree. 
-     * This is a 2-step process.
-     * 
-     * Parse nodes from the file:
-     * 1) Take line "batteryTemperature=0/30;networkType=wifi entropy=0,338785 ev=0,000274 count=15059 error=0,050335"
-     * 2) Parse key "batteryTemperature=0/30;networkType=wifi"
-     * 3) Parse value "networkType=wifi entropy=0,338785 ev=0,000274 count=15059 error=0,050335"
-     * 4) Save the pair in a map containing nodes
-     * Repeat for each line in our file.
-     * 
-     * Generate a tree from nodes:
-     * 1) Take key "batteryTemperature=0/30;networkType=wifi"
-     * 2) Use the key to get our current node
-     * 3) Parse key as "batteryTemperature=0/30" 
-     * 4) Use parsed key to get the parent node
-     * 5) Add this node as a parent to our current node
-     * 6) Add current node as a child to the parent node
-     * Repeat for each key in our map.
-     * 
-     * Using these steps a complete EVTree is formed.
+     * This is a 2-step process: parse nodes -> add to tree.
+     * See comments in code for additional information.
      * 
      * @param file File containing the tree
      * @return Complete tree
@@ -51,14 +34,22 @@ public class Parser {
     public static EVTree parseTree(File file) throws FileNotFoundException {
         scanner = new Scanner(file);
         
-        // Instantate root node
+        // Find and instantate the root node, wind up the scanner.
+        // Node value cannot be null, so use "null" instead.
         String line = getRoot(scanner);
         EVNode root = new EVNode();
         root.setSplit("root");
         root.setValueString("null");
         setValues(root, line);
         
-        // Parse nodes line by line
+        /* 
+        * Parse nodes from the file.
+        * 1) Take a line, e.g. "batteryTemperature=0/30;networkType=wifi <values>"
+        * 2) Parse a key "batteryTemperature=0/30;networkType=wifi"
+        * 3) Parse a value "networkType=wifi entropy=0,338785.."
+        * 4) Save this key-value pair in a map containing all nodes
+        * Repeat for each line in the file.
+        */
         EVNode node;
         while (scanner.hasNextLine()) {
             line = scanner.nextLine();
@@ -67,42 +58,56 @@ public class Parser {
             nodes.put(level, node);
         }
         
-        // Loop through created nodes
+        /*
+        * Generate a tree from the saved nodes.
+        * 1) Take key "batteryTemperature=0/30;networkType=wifi"
+        * 2) Use the key to get our current node
+        * 3) Parse key as "batteryTemperature=0/30" 
+        * 4) Use parsed key to get the parent node
+        * 5) Add this node as a parent to our current node
+        * 6) Add current node as a child to the parent node
+        * Repeat for each key in our map.
+        */
         for(String hash : nodes.keySet()){
             node = nodes.get(hash);
             
             // Prune unrealiable nodes with high error
             if(node.getErr() >= MAXIMUM_ERROR_RATIO * node.getEv()) continue;
+            
+            // Substring the parent chain and use it as a key to get parent node
             int i = hash.lastIndexOf(PARENT_DELIMITER);
             String parentHash = (i>=0) ? hash.substring(0, i) : "";
             EVNode parent = nodes.get(parentHash);
+            
+            // Set this node as a parent to current one, and current one as a child to the parent.
             node.setParent((parent == null) ? root : parent);
             if(node.getValueString() == null || !node.getValueString().equalsIgnoreCase("other")){
                 ((parent == null) ? root : parent).addChild(node);
             }
         }
-        
         return new EVTree(root);
     }
 
     /**
-     * Adds values to a node from a text line.
-     * @param node Initial node
-     * @param raw Raw line of data
-     * @return Node level hash
+     * Parses a line of text and saves values in an EVNode.
+     * @param node Node to save values to
+     * @param line Data to be parsed
+     * @return Level identifier for this node
      */
-    private static String setValues(EVNode node, String raw) {
-        int dataIndex = raw.lastIndexOf(PARENT_DELIMITER);
-        String[] nodeData = raw.substring(dataIndex+1).split(DATA_DELIMITER);
+    private static String setValues(EVNode node, String line) {
+        int dataIndex = line.lastIndexOf(PARENT_DELIMITER);
+        String[] nodeData = line.substring(dataIndex+1).split(DATA_DELIMITER);
         
-        // Everything before data
-        String parentChain = (dataIndex >=0) ? raw.substring(0, dataIndex+1) : "";
-        String level = parentChain + nodeData[0];
+        // Parent chain consists of everything before the actual data
+        String parentChain = (dataIndex >=0) ? line.substring(0, dataIndex+1) : "";
+        String level = parentChain + nodeData[0]; // Level identifier
 
-        // Set node values
+        // Set a split name and a value, which can be string/range
         if(!"root".equals(node.getSplit())){
             String split[] = getSplit(nodeData);
             node.setSplit(split[0]);
+            
+            // Detect range
             if(split[1].contains(RANGE_DELIMITER)){
                 String[] parts = split[1].split(RANGE_DELIMITER);
                 Range range = new Range(
@@ -112,11 +117,14 @@ public class Parser {
                 node.setValueRange(range);
             } else node.setValueString(split[1]);
         }
+        
+        // Other properties
         node.setEntropy(getDoubleValue(nodeData, 1));
         node.setEv(getDoubleValue(nodeData, 2));
         node.setCount(getDoubleValue(nodeData, 3));
         node.setErr(getDoubleValue(nodeData, 4));
         
+        // Return a level identifier used as a key
         return level;
     }
 
@@ -126,12 +134,12 @@ public class Parser {
         return Double.parseDouble(value);
     }
 
-    // Returns a split split
+    // Returns a split name and it's value
     private static String[] getSplit(String[] values) {
         return values[0].split(VALUE_DELIMITER);
     }
 
-    // Rewind to second root index
+    // Rewind scanner to second root index
     private static String getRoot(Scanner s) {
         int rootCount = 0;
         while (s.hasNextLine()) {

@@ -4,10 +4,10 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 /**
- * Simple implementation for immutable ranges.
+ * Simple implementation for a generic immutable range.
  * @author Jonatan Hamberg
  * 
- * @param <T> Type of elements in range.
+ * @param <T> Element type
  */
 public final class Range<T> implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -57,8 +57,8 @@ public final class Range<T> implements Serializable {
      */
     public boolean contains(T t){
         return (t == null) ? false 
-                :   comparator.compare(t, min) > -1 
-                &&  comparator.compare(t, max) < 1;
+            :   comparator.compare(t, min) > -1 
+            &&  comparator.compare(t, max) < 1;
     }
     
     @Override

@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 
 /**
+ * EVTreeusage demonstration
  * @author Jonatan Hamberg
  */
 public class Main {
@@ -15,14 +16,16 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException {
         File treeFile = openFile();
         EVTree tree = Parser.parseTree(treeFile);
-        tree.print(); // depth 3
+        tree.print(); // accepts depth as a parameter
         
+        // Print suggestions
         HashMap<String, Object> info = getDeviceInfo();
         for(String suggestion : tree.getSuggestions(info)){
             System.out.println(suggestion);
         }
     }
 
+    // Open a log file using JFileChooser
     private static File openFile() {
         JFileChooser fileChooser = new JFileChooser();
         int returnValue = fileChooser.showOpenDialog(null);
@@ -35,7 +38,8 @@ public class Main {
         return null;
     }
     
-    // Similar data will ultimately come from device
+    // Simulate data coming from an Android device
+    // These can be changed to refresh suggestions
     private static HashMap<String, Object> getDeviceInfo() {
         return new HashMap<String, Object>() {{
             put("batteryTemperature", 20);

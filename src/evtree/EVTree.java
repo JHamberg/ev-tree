@@ -56,6 +56,8 @@ public class EVTree implements Serializable{
         for(EVNode node : this.getSuggestedNodes(info)){
             String split = node.getSplit();
             String value = node.getValueString();
+            
+            // When value is null, we have a range
             if(value == null){
                 value = node.getValueRange().toString();
             }
@@ -67,38 +69,46 @@ public class EVTree implements Serializable{
     // Gets a list of suggested nodes
     private ArrayList<EVNode> getSuggestedNodes(HashMap<String, Object> info) {
         ArrayList<EVNode> suggestions = new ArrayList<>();
-        EVNode node = root;
+        EVNode node = root; // Iterator node
         TreeSet<EVNode> children;
         
-        // Get children for current node
+        // While current node has children
         while(!(children = node.getChildren()).isEmpty()){
             EVNode initial = node;
-            String split = children.first().getSplit();
-            EVNode bestNode = children.last();
-            Object deviceValue = info.get(split); 
             
+            // Each level is for the same split name
+            String splitName = children.first().getSplit();
+            EVNode bestNode = children.last();
+            Object deviceValue = info.get(splitName); 
+            
+            // Iterate through every child
             for(EVNode child : children){
+                // Get values for current child node
                 String value = child.getValueString();
                 Range range = child.getValueRange();
                 
-                // Check if value is in range or matching
+                // Check if iterator values match with the device value, 
+                // which can either be an integer or a string. When dealing
+                // with numbers, we can to check if it falls inside a range.
+                // Otherwise just check for string equality.
                 if((deviceValue instanceof Integer 
-                        && range != null 
-                        && range.contains(deviceValue))
-                        || (deviceValue instanceof String
-                        && value != null
-                        && value.equalsIgnoreCase((String) deviceValue))){
+                    && range != null 
+                    && range.contains(deviceValue))
+                    || (deviceValue instanceof String
+                    && value != null
+                    && value.equalsIgnoreCase((String) deviceValue))){
                     
-                     // Compare matching node to best
+                    // Compare matching node to best and add to suggestions
+                    // You can filter out results by excluding "other" here
                    if(bestNode.getEv() < child.getEv()){
                        suggestions.add(bestNode);
                    }
-                   // Traverse down
+                   // Traverse down the children
                    node = child;
                    break;
                 }
             }
-            // No matching child found
+            // No matching child found, stop traversing
             if(node == initial) break;
         }
         
